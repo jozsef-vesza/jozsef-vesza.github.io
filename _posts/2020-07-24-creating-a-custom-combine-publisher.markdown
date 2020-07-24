@@ -127,3 +127,10 @@ private final class PlayheadProgressSubscription<S: Subscriber>: Subscription wh
     ...
 }
 ```
+
+Let's look at them one by one:
+* `subscriber`: the Subscription will need a reference to the Subscriber to be able to notify it as events occur
+* `requested`: the Subscription keeps track of the demand coming from a Subscriber. There is an initial value passed via `request(_:)`, but it can also increase during the lifetime of the Subscription.
+* `timeObserverToken`: will be used to hold the return value of AVPlayer's `addPeriodicTimeObserver(forInterval:queue:using:)`
+* `interval`: the time interval at which values should be provided
+* `player`: the AVPlayer instance to observe
