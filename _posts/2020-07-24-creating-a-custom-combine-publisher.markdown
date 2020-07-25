@@ -35,7 +35,7 @@ These components operate together following a sequence of events:
 4. The Publisher sends values
 5. The Publisher completes (either regularly or due to an error)
 
-## Creating a Publisher
+## Creating the Publisher
 
 The goal of your Publisher will be to provide playback progress updates over a given interval. To do this, you can rely on AVPlayer's `addPeriodicTimeObserver(forInterval:queue:using:)` method.
 
@@ -80,6 +80,8 @@ extension Publishers {
 Whenever a Subscriber subscribes to a Publisher, the `receive(subscriber:)` method is invoked. From that point, it's the Publisher's responsibility to create a Subscription, and pass it back to the Subscriber. Take a moment to look at the method signature: it states that the Subscriber's Input type must match the Publisher's Output type, and the Failure types must also match. Think back to the sequence of events: Steps 1 and 2 are covered here.
 
 You'll get back to this method implementation in just a bit, but let's take care of the Subscription first.
+
+## Creating the Subscription
 
 The Subscription is where most of the work will happen: it's responsible for performing the work based on the demand of the Subscriber. Below the `PlayheadProgressPublisher` struct, add the following declaration:
 
@@ -134,3 +136,126 @@ Let's look at them one by one:
 * `timeObserverToken`: will be used to hold the return value of AVPlayer's `addPeriodicTimeObserver(forInterval:queue:using:)`
 * `interval`: the time interval at which values should be provided
 * `player`: the AVPlayer instance to observe
+
+Before moving on, add the following method to the Subscription:
+
+```swift
+private func completeIfNeeded() {
+    if requested == .none {
+        subscriber?.receive(completion: .finished)
+    }
+}
+```
+
+This is a helper method to prevent code duplication. It checks if there are more values requested, and if not, it completes the Subscription.
+
+Now it's time to implement `request(_:)`. Update your implementation to the following:
+
+```swift
+func request(_ demand: Subscribers.Demand) {
+    // 1.
+    requested += demand
+    // 2.
+    completeIfNeeded()
+    // 3.
+    guard timeObserverToken == nil else { return }
+    
+    // 4.
+    let interval = CMTime(seconds: self.interval, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+    timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) { [weak self] time in
+        guard let self = self, let subscriber = self.subscriber else { return }
+        // 5.
+        self.requested -= .max(1)
+        // 6.
+        let newDemand = subscriber.receive(time.seconds)
+        self.requested += newDemand
+        // 7.
+        self.completeIfNeeded()
+    }
+}
+```
+
+Okay, that's a lot of new code, let's go over the changes:
+1. When the Subscriber requests values, it can specify how many values it wants by passing the initial demand. The Subscription is responsible for keeping track of the demand, so you'll increment `requested` by the received amount.
+2. If no are requested, the Subscription can complete immediately.
+3. The goal is to only start emitting events once a Subscriber is attached to a Publisher. If `timeObserverToken` is nil, that means that the Subscription hasn't started querying the playback progress yet.
+4. This is the point where the Subscription starts to query the playback progress, with the frequency specified in `interval`.
+5. Once there is a new value to emit, `requested` must be decremented.
+6. The value is then delivered to the Subscriber. Upon receiving a value, the Subscriber may choose to update the demand, so the Subscription must update `requested` to keep track of the new demand.
+7. If no more values are requested, the Subscription can complete.
+
+Notice how it's entirely up to the Subscribtion implementation to honor the demand. This is a crucial point: if you forget to decrement `requested`, the Subscriber may emit more values than requested; if you don't keep track of the updated demand, the Subscriber can end up delivering fewer values. There is no automatic behavior you can rely on to update the demand, and manual bookkeeping can be error-prone, which is why it's important to unit test your custom Publishers, which will be covered in Part 2 of the series.
+
+There is one final piece the for the Subscription, which is cancellation. Update the implementation of `cancel()`:
+
+```swift
+func cancel() {
+    if let timeObserverToken = timeObserverToken {
+        player.removeTimeObserver(timeObserverToken)
+    }
+    timeObserverToken = nil
+    subscriber = nil
+}
+```
+
+These are cleanup steps: the Subscription stops observing the playback progress, and nils out `timeObserverToken` and its reference tot he Subscriber (the Subscriber alredy retains the Subscription, so this step is necessary to break the retain cycle).
+
+And with that, the implementation of Subscription is complete. Now it's time to connect the parts.
+
+## Passing the Subscription to the Subscriber
+
+The final piece of the puzzle is to pass your new Subscriber implementation to the Subscriber upon subscription. Before doing that, you'll need to add a few more properties to the Publisher:
+
+```swift
+private let interval: TimeInterval
+private let player: AVPlayer
+
+init(interval: TimeInterval = 0.25, player: AVPlayer) {
+    self.player = player
+    self.interval = interval
+}
+```
+
+Notice how the properties mirror the input parameters of the Subscription. This is no accident, you'll use them to initialize it. Now update the implementation of `receive(subscriber:)`:
+
+```swift
+func receive<S>(subscriber: S) where S : Subscriber, Self.Failure == S.Failure, Self.Output == S.Input {
+    let subscription = PlayheadProgressSubscription(subscriber: subscriber,
+                                                    interval: interval,
+                                                    player: player)
+    subscriber.receive(subscription: subscription)
+}
+```
+
+Here you'll create a new Subscription and pass it to the Subscriber to kick off the event stream.
+
+## Trying it out
+
+Now that your custom Publisher is ready to use, it's time to finally give it a try. To make the new Publisher easier to access, declare the following AVPlayer extension:
+
+```swift
+extension AVPlayer {
+    func playheadProgressPublisher(interval: TimeInterval = 0.25) -> Publishers.PlayheadProgressPublisher {
+        Publishers.PlayheadProgressPublisher(interval: interval, player: self)
+    }
+}
+```
+
+Now you can start observing the playback progress:
+
+```swift
+var subscriptions = Set<AnyCancellable>()
+let videoURL = URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")!
+
+let player = AVPlayer(url: videoURL)
+
+player.playheadProgressPublisher()
+    .sink { (time) in
+        print("received playhead progress: \(time)")
+    }
+    .store(in: &subscriptions)
+```
+
+## Conclusion
+
+I hope you enjoyed this guide on custom Publishers. It may seem like a lot to digest at first, so definitely take your time to play around with the concept, try to apply it on some of your own existing code. As noted previously, it's definitely a good idea to back your Publisher implementations up with unit tests, and in Part 2, you'll learn about how to just that.
