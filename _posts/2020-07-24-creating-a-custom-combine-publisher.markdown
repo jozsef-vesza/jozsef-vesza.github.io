@@ -9,9 +9,11 @@ If you're just getting started with Combine, the idea of a custom publisher can 
 
 ## Getting Started
 
-Along with introducing Combine, Apple also extended many well-known APIs, such as `URLSession` and `NotificationCenter` to offer built-in Publishers. Make sure to have a look in the documentation before deciding to roll your own implementation. 
+Along with introducing Combine, Apple also extended many well-known APIs, such as `URLSession` and `NotificationCenter` to offer built-in Publishers. Make sure to have a look in the documentation before deciding to roll your own implementation.
 
 AVFoundation is a good candidate to extend: is has events delivered via KVO, NotifcationCenter, and some of them you'll have to query yourself. With Combine's Publishers you could unify the event delivery. This post will guide you through the process by creating a publisher for observing AVPlayer's playback progress.
+
+There are multiple ways for creating your own Publishers: you can use the `@Published` property wrapper, or use a `PassthroughSubject` instance to send values on demand. In this guide however, you'll build a Publisher from scratch.
 
 Let's have a look at Combine's the key components.
 
@@ -39,7 +41,7 @@ These components operate together following a sequence of events:
 
 ## Creating the Publisher
 
-The goal of your Publisher will be to provide playback progress updates over a given interval. To do this, you can rely on AVPlayer's `addPeriodicTimeObserver(forInterval:queue:using:)` method.
+The goal of your Publisher will be to provide playback progress updates over a given interval. To do this, you can rely on AVPlayer's `addPeriodicTimeObserver(forInterval:queue:using:)` method, which will periodically invoke its closure parameter to report the progress.
 
 Let's start by declaring the new Publisher:
 
@@ -51,7 +53,7 @@ extension Publishers {
 }
 ```
 
-This bit of code will not build, but Xcode will offer some hints on what to implement next: A Publisher must declare the type of values, and errors it can emit. This Publisher will emit the current progress in seconds, and will not emit an error. Let's update the implementation:
+This bit of code will not build, but Xcode will offer some helpful hints on how to proceed: A Publisher must declare the type of values, and errors it can emit. This Publisher will emit the current progress in seconds, and will not emit an error. Let's update the implementation:
 
 ```swift
 extension Publishers {
@@ -62,7 +64,7 @@ extension Publishers {
 }
 ```
 
-After declaring the types, you'll still get build errors, but Xcode will offer you another suggestion to get closer to your goal. Update your implementation with the following:
+After declaring the types, you'll still get build errors, but thankfully Xcode will offer another round of fix-its. Update your implementation with the following:
 
 ```swift
 extension Publishers {
@@ -79,9 +81,9 @@ extension Publishers {
 }
 ```
 
-Whenever a Subscriber subscribes to a Publisher, the `receive(subscriber:)` method is invoked. From that point, it's the Publisher's responsibility to create a Subscription, and pass it back to the Subscriber. Take a moment to look at the method signature: it states that the Subscriber's Input type must match the Publisher's Output type, and the Failure types must also match. Think back to the sequence of events: Steps 1 and 2 are covered here.
+Whenever a Subscriber subscribes to a Publisher, the `receive(subscriber:)` method is invoked. From that point, it's the Publisher's responsibility to create a Subscription, and pass it back to the Subscriber. Take a moment to look at the method signature: it states that the Subscriber's Input type must match the Publisher's Output type, and the Failure types must also match. Think back to the sequence of events: **Steps 1 and 2** are covered here.
 
-You'll get back to this method implementation in just a bit, but let's take care of the Subscription first.
+To be able to pass the Subscription to the Subscriber, you'll first need to take a detour to implement it. Let's have a look.
 
 ## Creating the Subscription
 
@@ -110,7 +112,7 @@ private final class PlayheadProgressSubscription<S: Subscriber>: Subscription wh
 }
 ```
 
-The first method will cover Step 3 in the sequence of events: when a Subscriber requests values from a Publisher, `request(_:)` will be invoked on the Subscription. The other method is invoked when the Subscription is cancelled; it's your chance to clean up.
+The first method will cover **Step 3** in the sequence of events: when a Subscriber starts requesting values from a Publisher, `request(_:)` will be invoked on the Subscription. The other method, `cancel()` is invoked when the Subscription is cancelled; it's your chance to clean up.
 
 Before diving into the implementation of these methods, let's add a few properties, and an init method to the Subscription:
 
@@ -139,7 +141,7 @@ Let's look at them one by one:
 * `interval`: the time interval at which values should be provided
 * `player`: the AVPlayer instance to observe
 
-Before moving on, add the following method to the Subscription:
+Additionally, add the following method to the Subscription:
 
 ```swift
 private func completeIfNeeded() {
@@ -149,7 +151,7 @@ private func completeIfNeeded() {
 }
 ```
 
-This is a helper method to prevent code duplication. It checks if there are more values requested, and if not, it completes the Subscription.
+This is a helper method to prevent code duplication: it checks if there are more values requested, and if not, it completes the Subscription.
 
 Now it's time to implement `request(_:)`. Update your implementation to the following:
 
@@ -179,12 +181,12 @@ func request(_ demand: Subscribers.Demand) {
 
 Okay, that's a lot of new code, let's go over the changes:
 1. When the Subscriber requests values, it can specify how many values it wants by passing the initial demand. The Subscription is responsible for keeping track of the demand, so you'll increment `requested` by the received amount.
-2. If no are requested, the Subscription can complete immediately.
-3. The goal is to only start emitting events once a Subscriber is attached to a Publisher. If `timeObserverToken` is nil, that means that the Subscription hasn't started querying the playback progress yet.
-4. This is the point where the Subscription starts to query the playback progress, with the frequency specified in `interval`.
-5. Once there is a new value to emit, `requested` must be decremented.
-6. The value is then delivered to the Subscriber. Upon receiving a value, the Subscriber may choose to update the demand, so the Subscription must update `requested` to keep track of the new demand.
-7. If no more values are requested, the Subscription can complete.
+2. This is an early return opportunity: if no values are requested, the Subscription can complete immediately.
+3. The goal is to only start emitting events once a Subscriber is attached to a Publisher. If `timeObserverToken` is nil, that means that the Subscription hasn't started producing values yet.
+4. At this point the Subscription starts to query the playback progress, with the frequency specified in `interval`.
+5. Once there is a new value to emit, `requested` is decremented to avoid sending more values than needed.
+6. The value is then delivered to the Subscriber (**Step 4** in the event sequence). Upon receiving a value, the Subscriber may choose to update the demand, so the Subscription must update `requested` to keep up with the new demand.
+7. If no more values are requested, the Subscription can complete (**The final step of the event sequence**).
 
 Notice how it's entirely up to the Subscribtion implementation to honor the demand. This is a crucial point: if you forget to decrement `requested`, the Subscriber may emit more values than requested; if you don't keep track of the updated demand, the Subscriber can end up delivering fewer values. There is no automatic behavior you can rely on to update the demand, and manual bookkeeping can be error-prone, which is why it's important to unit test your custom Publishers, which will be covered in Part 2 of the series.
 
@@ -200,13 +202,13 @@ func cancel() {
 }
 ```
 
-These are cleanup steps: the Subscription stops observing the playback progress, and nils out `timeObserverToken` and its reference tot he Subscriber (the Subscriber alredy retains the Subscription, so this step is necessary to break the retain cycle).
+These are cleanup steps: the Subscription stops observing the playback progress, and nils out `timeObserverToken` and its reference to the Subscriber (the Subscriber alredy retains the Subscription, so this step is necessary to break the retain cycle).
 
 And with that, the implementation of Subscription is complete. Now it's time to connect the parts.
 
 ## Passing the Subscription to the Subscriber
 
-The final piece of the puzzle is to pass your new Subscriber implementation to the Subscriber upon subscription. Before doing that, you'll need to add a few more properties to the Publisher:
+The final piece of the puzzle is to pass your new Subscription implementation to the Subscriber upon subscription. Before doing that, you'll need to add a few more properties to the Publisher:
 
 ```swift
 private let interval: TimeInterval
