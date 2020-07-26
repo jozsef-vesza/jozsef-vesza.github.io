@@ -7,15 +7,17 @@ categories: posts
 
 If you're just getting started with Combine, the idea of a custom publisher can sound scary, but diving into the topic has many benefits: you'll understand how parts of the framework work together, and will be able to create your own Combine-powered APIs. 
 
-This post will guide you through the process by creating a publisher for observing AVPlayer's playback progress.
-
 ## Getting Started
 
-There are three key players in Combine:
+Along with introducing Combine, Apple also extended many well-known APIs, such as `URLSession` and `NotificationCenter` to offer built-in Publishers. Make sure to have a look in the documentation before deciding to roll your own implementation. 
+
+AVFoundation is a good candidate to extend: is has events delivered via KVO, NotifcationCenter, and some of them you'll have to query yourself. With Combine's Publishers you could unify the event delivery. This post will guide you through the process by creating a publisher for observing AVPlayer's playback progress.
+
+Let's have a look at Combine's the key components.
 
 #### Publishers
 
-A Publisher represents a type that delivers values over time to Subscribers. Along with Combine, Apple also extended many well-known APIs, such as `URLSession` and `NotificationCenter` to offer built-in Publishers. Feel free to rely on them if they suit your needs instead of reinventing the wheel.
+A Publisher represents a type that delivers values over time to Subscribers. A Publisher's job is to accept a Subscriber, which it will later notify as events occur. Combine also offers various operators; these are Publishers, that receive data from an upstream Publishers, manipulate the data (e.g. map the received values to another type), and sends the results downstream.
 
 #### Subscribers
 
