@@ -1,0 +1,377 @@
+$code-font-family: Menlo, Monaco, "Courier New", monospace;
+$code-color: $primary-color;
+
+/**
+ * Reset some basic elements
+ */
+body, h1, h2, h3, h4, h5, h6,
+p, blockquote, pre, hr,
+dl, dd, ol, ul, figure {
+  margin: 0;
+  padding: 0;
+}
+
+
+
+/**
+ * Basic styling
+ */
+body {
+  font: $base-font-weight #{$base-font-size}/#{$base-line-height} $base-font-family;
+  color: $text-color;
+  background-color: $background-color;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-feature-settings: "kern" 1;
+     -moz-font-feature-settings: "kern" 1;
+       -o-font-feature-settings: "kern" 1;
+          font-feature-settings: "kern" 1;
+  font-kerning: normal;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    color: $text-color-dark;
+    background-color: $background-color-dark;
+  }
+}
+
+
+
+/**
+ * Set `margin-bottom` to maintain vertical rhythm
+ */
+h1, h2, h3, h4, h5, h6,
+p, blockquote, pre,
+ul, ol, dl, figure,
+%vertical-rhythm {
+  margin-bottom: $spacing-unit / 2;
+}
+
+
+
+/**
+ * `main` element
+ */
+main {
+  display: block; /* Default value of `display` of `main` element is 'inline' in IE 11. */
+}
+
+
+
+/**
+ * Images
+ */
+img {
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+
+
+/**
+ * Figures
+ */
+figure > img {
+  display: block;
+}
+
+figcaption {
+  font-size: $small-font-size;
+}
+
+
+
+/**
+ * Lists
+ */
+ul, ol {
+  margin-left: $spacing-unit;
+}
+
+li {
+  > ul,
+  > ol {
+    margin-bottom: 0;
+  }
+}
+
+
+
+/**
+ * Headings
+ */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: $base-font-weight;
+}
+
+
+
+/**
+ * Links
+ */
+a {
+  color: $primary-color;
+  text-decoration: none;
+  &:hover {
+    color: $text-color;
+    text-decoration: underline;
+  }
+
+  .social-media-list &:hover {
+    text-decoration: none;
+
+    .username {
+      text-decoration: underline;
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  a {
+    color: $primary-color-dark;
+    text-decoration: none;
+
+    &:hover {
+      color: $text-color-dark;
+      text-decoration: underline;
+    }
+  
+    .social-media-list &:hover {
+      text-decoration: none;
+  
+      .username {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+
+/**
+ * Blockquotes
+ */
+blockquote {
+  color: $primary-color;
+  border-left: 4px solid $primary-color-lighter;
+  padding-left: $spacing-unit / 2;
+  @include relative-font-size(1.125);
+  letter-spacing: -1px;
+  font-style: italic;
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  blockquote {
+    color: $primary-color-dark;
+    border-left: 4px solid $primary-color-dark-lighter;
+  }
+}
+
+
+
+code,
+pre {
+  font-family: $code-font-family;
+}
+
+code {
+  font-size: 85%;
+  color: $code-color;
+  background-color: transparent;
+  border-radius: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+  code {
+    font-size: 85%;
+    color: $primary-color-dark;
+    background-color: transparent;
+    border-radius: 3px;
+  }
+}
+
+pre {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+pre code {
+  padding: 0;
+  font-size: 100%;
+  color: inherit;
+  background-color: transparent;
+}
+
+// Pygments via Jekyll
+.highlight {
+  padding: 16px; //1rem;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
+  font-size: 11pt;
+  background-color: $code-snippet-background-color;
+  border-radius: .25rem;
+  box-shadow: $code-snippet-box-shadow;
+
+  pre {
+    margin-bottom: 0;
+    overflow-x: auto;
+    box-shadow: unset;
+    background-color: unset;
+  }
+
+  .lineno {
+    display: inline-block; // Ensures the null space also isn't selectable
+    padding-right: .75rem;
+    padding-left: .25rem;
+    color: #999;
+    // Make sure numbers aren't selectable
+    -webkit-user-select: none;
+       -moz-user-select: none;
+            user-select: none;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .highlight {
+    padding: 16px; //1rem;
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+    font-size: 11pt;
+    background-color: $code-snippet-background-color-dark;
+    border-radius: .25rem;
+    box-shadow: unset;
+  
+    pre {
+      margin-bottom: 0;
+      overflow-x: auto;
+      box-shadow: unset;
+      background-color: unset;
+    }
+  
+    .lineno {
+      display: inline-block; // Ensures the null space also isn't selectable
+      padding-right: .75rem;
+      padding-left: .25rem;
+      color: #999;
+      // Make sure numbers aren't selectable
+      -webkit-user-select: none;
+         -moz-user-select: none;
+              user-select: none;
+    }
+  }
+}
+
+/**
+ * Wrapper
+ */
+.wrapper {
+  max-width: -webkit-calc(#{$content-width} - (#{$spacing-unit} * 2));
+  max-width:         calc(#{$content-width} - (#{$spacing-unit} * 2));
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: $spacing-unit;
+  padding-left: $spacing-unit;
+  @extend %clearfix;
+
+  @include media-query($on-laptop) {
+    max-width: -webkit-calc(#{$content-width} - (#{$spacing-unit}));
+    max-width:         calc(#{$content-width} - (#{$spacing-unit}));
+    padding-right: $spacing-unit / 2;
+    padding-left: $spacing-unit / 2;
+  }
+}
+
+
+
+/**
+ * Clearfix
+ */
+%clearfix:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+
+
+/**
+ * Icons
+ */
+
+.svg-icon {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    fill: #{$primary-color};
+    padding-right: 5px;
+    vertical-align: text-top;
+}
+
+.social-media-list {
+  li + li {
+    padding-top: 5px;
+  }
+}
+
+
+
+/**
+ * Tables
+ */
+table {
+  margin-bottom: $spacing-unit;
+  width: 100%;
+  text-align: $table-text-align;
+  color: lighten($text-color, 18%);
+  border-collapse: collapse;
+  border: 1px solid $primary-color-lighter;
+  tr {
+    &:nth-child(even) {
+      background-color: lighten($primary-color-lighter, 6%);
+    }
+  }
+  th, td {
+    padding: ($spacing-unit / 3) ($spacing-unit / 2);
+  }
+  th {
+    background-color: lighten($primary-color-lighter, 3%);
+    border: 1px solid darken($primary-color-lighter, 4%);
+    border-bottom-color: darken($primary-color-lighter, 12%);
+  }
+  td {
+    border: 1px solid $primary-color-lighter;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  table {
+    margin-bottom: $spacing-unit;
+    width: 100%;
+    text-align: $table-text-align;
+    color: lighten($text-color-dark, 18%);
+    border-collapse: collapse;
+    border: 1px solid $primary-color-dark-lighter;
+    tr {
+      &:nth-child(even) {
+        background-color: lighten($primary-color-dark-lighter, 6%);
+      }
+    }
+    th, td {
+      padding: ($spacing-unit / 3) ($spacing-unit / 2);
+    }
+    th {
+      background-color: lighten($primary-color-dark-lighter, 3%);
+      border: 1px solid darken($primary-color-dark-lighter, 4%);
+      border-bottom-color: darken($primary-color-dark-lighter, 12%);
+    }
+    td {
+      border: 1px solid $primary-color-dark-lighter;
+    }
+  }
+}
