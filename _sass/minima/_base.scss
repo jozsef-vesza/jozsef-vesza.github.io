@@ -31,6 +31,13 @@ body {
   flex-direction: column;
 }
 
+@media (prefers-color-scheme: dark) {
+  body {
+    color: $text-color-dark;
+    background-color: $background-color-dark;
+  }
+}
+
 
 
 /**
@@ -106,7 +113,7 @@ h1, h2, h3, h4, h5, h6 {
  * Links
  */
 a {
-  color: $brand-color;
+  color: $primary-color;
   text-decoration: none;
 
   &:visited {
@@ -127,13 +134,37 @@ a {
   }
 }
 
+@media (prefers-color-scheme: dark) {
+  a {
+    color: $primary-color-dark;
+    text-decoration: none;
+  
+    &:visited {
+      color: $text-color-dark;
+    }
+  
+    &:hover {
+      color: $text-color-dark;
+      text-decoration: underline;
+    }
+  
+    .social-media-list &:hover {
+      text-decoration: none;
+  
+      .username {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
 
 /**
  * Blockquotes
  */
 blockquote {
   color: $primary-color;
-  border-left: 4px solid $primary-color-light;
+  border-left: 4px solid $primary-color-lighter;
   padding-left: $spacing-unit / 2;
   @include relative-font-size(1.125);
   letter-spacing: -1px;
@@ -141,6 +172,13 @@ blockquote {
 
   > :last-child {
     margin-bottom: 0;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  blockquote {
+    color: $primary-color-dark;
+    border-left: 4px solid $primary-color-dark-lighter;
   }
 }
 
@@ -156,6 +194,15 @@ code {
   color: $code-color;
   background-color: transparent;
   border-radius: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+  code {
+    font-size: 85%;
+    color: $primary-color-dark;
+    background-color: transparent;
+    border-radius: 3px;
+  }
 }
 
 pre {
@@ -196,6 +243,36 @@ pre code {
     -webkit-user-select: none;
        -moz-user-select: none;
             user-select: none;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .highlight {
+    padding: 16px; //1rem;
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+    font-size: 11pt;
+    background-color: $code-snippet-background-color-dark;
+    border-radius: .25rem;
+    box-shadow: unset;
+  
+    pre {
+      margin-bottom: 0;
+      overflow-x: auto;
+      box-shadow: unset;
+      background-color: unset;
+    }
+  
+    .lineno {
+      display: inline-block; // Ensures the null space also isn't selectable
+      padding-right: .75rem;
+      padding-left: .25rem;
+      color: #999;
+      // Make sure numbers aren't selectable
+      -webkit-user-select: none;
+         -moz-user-select: none;
+              user-select: none;
+    }
   }
 }
 
@@ -262,21 +339,48 @@ table {
   text-align: $table-text-align;
   color: lighten($text-color, 18%);
   border-collapse: collapse;
-  border: 1px solid $primary-color-light;
+  border: 1px solid $primary-color-lighter;
   tr {
     &:nth-child(even) {
-      background-color: lighten($primary-color-light, 6%);
+      background-color: lighten($primary-color-lighter, 6%);
     }
   }
   th, td {
     padding: ($spacing-unit / 3) ($spacing-unit / 2);
   }
   th {
-    background-color: lighten($primary-color-light, 3%);
-    border: 1px solid darken($primary-color-light, 4%);
-    border-bottom-color: darken($primary-color-light, 12%);
+    background-color: lighten($primary-color-lighter, 3%);
+    border: 1px solid darken($primary-color-lighter, 4%);
+    border-bottom-color: darken($primary-color-lighter, 12%);
   }
   td {
-    border: 1px solid $primary-color-light;
+    border: 1px solid $primary-color-lighter;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  table {
+    margin-bottom: $spacing-unit;
+    width: 100%;
+    text-align: $table-text-align;
+    color: lighten($text-color-dark, 18%);
+    border-collapse: collapse;
+    border: 1px solid $primary-color-dark-lighter;
+    tr {
+      &:nth-child(even) {
+        background-color: lighten($primary-color-dark-lighter, 6%);
+      }
+    }
+    th, td {
+      padding: ($spacing-unit / 3) ($spacing-unit / 2);
+    }
+    th {
+      background-color: lighten($primary-color-dark-lighter, 3%);
+      border: 1px solid darken($primary-color-dark-lighter, 4%);
+      border-bottom-color: darken($primary-color-dark-lighter, 12%);
+    }
+    td {
+      border: 1px solid $primary-color-dark-lighter;
+    }
   }
 }
