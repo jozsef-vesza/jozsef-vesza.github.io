@@ -10,10 +10,10 @@ $primary-color-lighter: lighten($primary-color, 40%) !default;
 $primary-color-darker: darken($primary-color, 25%) !default;
 
 // dark mode
-$primary-color-dark:    #773344;
+$primary-color-dark:    #e46b34;
 $text-color-dark:       #E3E8FF !default;
 $background-color-dark: rgba(13, 16, 40, 1);
-$code-snippet-background-color-dark: rgba(0, 0, 0, 0.5);
+$code-snippet-background-color-dark: rgba(54, 66, 77, 0.34);
 $code-snippet-box-shadow-dark: transparent;
 $primary-color-dark-lighter: lighten($primary-color-dark, 40%) !default;
 $primary-color-dar-darker: darken($primary-color-dark, 25%) !default;
