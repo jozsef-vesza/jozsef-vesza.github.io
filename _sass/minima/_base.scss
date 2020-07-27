@@ -173,14 +173,18 @@ pre code {
 // Pygments via Jekyll
 .highlight {
   padding: 16px; //1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
   font-size: 11pt;
-  background-color: white;
+  background-color: rgba(57, 19, 184, 0.1);
   border-radius: .25rem;
+  box-shadow: 0px 5px 20px rgba(92, 103, 153, 0.3), 0px 0px 3px rgba(0, 0, 0, 0.1);
 
   pre {
     margin-bottom: 0;
     overflow-x: auto;
+    box-shadow: unset;
+    background-color: unset;
   }
 
   .lineno {
