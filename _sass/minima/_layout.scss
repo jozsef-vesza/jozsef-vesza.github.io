@@ -19,7 +19,7 @@
 
   &,
   &:visited {
-    color: $grey-color-dark;
+    color: $purple-color-dark;
   }
 }
 
@@ -36,7 +36,7 @@
   }
 
   .page-link {
-    color: $text-color;
+    color: $purple-color;
     line-height: $base-line-height;
 
     // Gaps between nav items, but not on the last one
@@ -50,7 +50,7 @@
     top: 9px;
     right: $spacing-unit / 2;
     background-color: $background-color;
-    border: 1px solid $grey-color-light;
+    border: 1px solid $purple-color-light;
     border-radius: 5px;
     text-align: right;
 
@@ -73,7 +73,7 @@
       text-align: center;
 
       > svg {
-        fill: $grey-color-dark;
+        fill: $purple-color-dark;
       }
     }
 
@@ -140,7 +140,7 @@ footer small {
 
 .post-meta {
   font-size: $small-font-size;
-  color: $grey-color;
+  color: $purple-color;
 }
 
 .post-link {

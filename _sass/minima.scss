@@ -10,15 +10,14 @@ $base-line-height: 1.5 !default;
 
 $spacing-unit:     30px !default;
 
+$purple-color:    #3913B8;
+
 $text-color:       #111 !default;
 $background-color: #F2F6FF !default;
-$brand-color:      #3913B8 !default;
+$brand-color:      $purple-color !default;
 
-$grey-color:       #828282 !default;
-$grey-color-light: lighten($grey-color, 40%) !default;
-$grey-color-dark:  darken($grey-color, 25%) !default;
-
-$brand-color-light: lighten($brand-color, 40%) !default;
+$purple-color-light: lighten($purple-color, 40%) !default;
+$purple-color-dark: darken($purple-color, 25%) !default;
 
 $table-text-align: left !default;
 

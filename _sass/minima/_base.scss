@@ -132,8 +132,8 @@ a {
  * Blockquotes
  */
 blockquote {
-  color: $grey-color;
-  border-left: 4px solid $grey-color-light;
+  color: $purple-color;
+  border-left: 4px solid $purple-color-light;
   padding-left: $spacing-unit / 2;
   @include relative-font-size(1.125);
   letter-spacing: -1px;
@@ -176,7 +176,6 @@ pre code {
   padding: 16px; //1rem;
   margin-bottom: 1rem;
   font-size: 11pt;
-  line-height: 1.4;
   background-color: white;
   border-radius: .25rem;
 
@@ -196,33 +195,6 @@ pre code {
             user-select: none;
   }
 }
-
-.gist .gist-file {
-  font-family: Menlo, Monaco, "Courier New", monospace !important;
-}
-
-.gist .markdown-body {
-  padding: 15px;
-}
-
-.gist pre {
-  padding: 0;
-  background-color: transparent;
-}
-
-.gist .gist-file .gist-data {
-  font-size: .8rem !important;
-  line-height: 1.4;
-}
-
-.gist code {
-  padding: 0;
-  color: inherit;
-  background-color: transparent;
-  border-radius: 0;
-}
-
-
 
 /**
  * Wrapper
@@ -265,7 +237,7 @@ pre code {
     width: 16px;
     height: 16px;
     display: inline-block;
-    fill: #{$grey-color};
+    fill: #{$purple-color};
     padding-right: 5px;
     vertical-align: text-top;
 }
@@ -287,21 +259,21 @@ table {
   text-align: $table-text-align;
   color: lighten($text-color, 18%);
   border-collapse: collapse;
-  border: 1px solid $grey-color-light;
+  border: 1px solid $purple-color-light;
   tr {
     &:nth-child(even) {
-      background-color: lighten($grey-color-light, 6%);
+      background-color: lighten($purple-color-light, 6%);
     }
   }
   th, td {
     padding: ($spacing-unit / 3) ($spacing-unit / 2);
   }
   th {
-    background-color: lighten($grey-color-light, 3%);
-    border: 1px solid darken($grey-color-light, 4%);
-    border-bottom-color: darken($grey-color-light, 12%);
+    background-color: lighten($purple-color-light, 3%);
+    border: 1px solid darken($purple-color-light, 4%);
+    border-bottom-color: darken($purple-color-light, 12%);
   }
   td {
-    border: 1px solid $grey-color-light;
+    border: 1px solid $purple-color-light;
   }
 }
