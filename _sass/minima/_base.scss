@@ -115,11 +115,6 @@ h1, h2, h3, h4, h5, h6 {
 a {
   color: $primary-color;
   text-decoration: none;
-
-  &:visited {
-    color: $text-color;
-  }
-
   &:hover {
     color: $text-color;
     text-decoration: underline;
@@ -138,11 +133,7 @@ a {
   a {
     color: $primary-color-dark;
     text-decoration: none;
-  
-    &:visited {
-      color: $text-color-dark;
-    }
-  
+
     &:hover {
       color: $text-color-dark;
       text-decoration: underline;
