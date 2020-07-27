@@ -141,18 +141,6 @@ Let's look at them one by one:
 * `interval`: the time interval at which values should be provided
 * `player`: the AVPlayer instance to observe
 
-Additionally, add the following method to the Subscription:
-
-```swift
-private func completeIfNeeded() {
-    if requested == .none {
-        subscriber?.receive(completion: .finished)
-    }
-}
-```
-
-This is a helper method to prevent code duplication: it checks if there are more values requested, and if not, it completes the Subscription.
-
 Now it's time to implement `request(_:)`. Update your implementation to the following:
 
 ```swift
@@ -172,7 +160,9 @@ func request(_ demand: Subscribers.Demand) {
         let newDemand = subscriber.receive(time.seconds)
         self.requested += newDemand
         // 6.
-        self.completeIfNeeded()
+        if self.requested == .none {
+            subscriber.receive(completion: .finished)
+        }
     }
 }
 ```
