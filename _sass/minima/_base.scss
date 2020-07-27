@@ -1,5 +1,5 @@
 $code-font-family: Menlo, Monaco, "Courier New", monospace;
-$code-color: #8352FD;
+$code-color: $primary-color;
 
 /**
  * Reset some basic elements
@@ -110,7 +110,7 @@ a {
   text-decoration: none;
 
   &:visited {
-    color: darken($brand-color, 15%);
+    color: $text-color;
   }
 
   &:hover {
@@ -132,8 +132,8 @@ a {
  * Blockquotes
  */
 blockquote {
-  color: $purple-color;
-  border-left: 4px solid $purple-color-light;
+  color: $primary-color;
+  border-left: 4px solid $primary-color-light;
   padding-left: $spacing-unit / 2;
   @include relative-font-size(1.125);
   letter-spacing: -1px;
@@ -176,9 +176,9 @@ pre code {
   margin-bottom: 2rem;
   margin-top: 2rem;
   font-size: 11pt;
-  background-color: rgba(57, 19, 184, 0.1);
+  background-color: $code-snippet-background-color;
   border-radius: .25rem;
-  box-shadow: 0px 5px 20px rgba(92, 103, 153, 0.3), 0px 0px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: $code-snippet-box-shadow;
 
   pre {
     margin-bottom: 0;
@@ -240,7 +240,7 @@ pre code {
     width: 16px;
     height: 16px;
     display: inline-block;
-    fill: #{$purple-color};
+    fill: #{$primary-color};
     padding-right: 5px;
     vertical-align: text-top;
 }
@@ -262,21 +262,21 @@ table {
   text-align: $table-text-align;
   color: lighten($text-color, 18%);
   border-collapse: collapse;
-  border: 1px solid $purple-color-light;
+  border: 1px solid $primary-color-light;
   tr {
     &:nth-child(even) {
-      background-color: lighten($purple-color-light, 6%);
+      background-color: lighten($primary-color-light, 6%);
     }
   }
   th, td {
     padding: ($spacing-unit / 3) ($spacing-unit / 2);
   }
   th {
-    background-color: lighten($purple-color-light, 3%);
-    border: 1px solid darken($purple-color-light, 4%);
-    border-bottom-color: darken($purple-color-light, 12%);
+    background-color: lighten($primary-color-light, 3%);
+    border: 1px solid darken($primary-color-light, 4%);
+    border-bottom-color: darken($primary-color-light, 12%);
   }
   td {
-    border: 1px solid $purple-color-light;
+    border: 1px solid $primary-color-light;
   }
 }
