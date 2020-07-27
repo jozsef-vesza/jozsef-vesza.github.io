@@ -135,7 +135,7 @@ private final class PlayheadProgressSubscription<S: Subscriber>: Subscription wh
 ```
 
 Let's look at them one by one:
-* `subscriber`: the Subscription will need a reference to the Subscriber to be able to notify it as events occur
+* `subscriber`: the Subscription retains the Subscriber to be able to notify it as events occur
 * `requested`: the Subscription keeps track of the demand coming from a Subscriber. There is an initial value passed via `request(_:)`, but it can also increase during the lifetime of the Subscription.
 * `timeObserverToken`: will be used to hold the return value of AVPlayer's `addPeriodicTimeObserver(forInterval:queue:using:)`
 * `interval`: the time interval at which values should be provided
@@ -160,20 +160,18 @@ func request(_ demand: Subscribers.Demand) {
     // 1.
     requested += demand
     // 2.
-    completeIfNeeded()
-    // 3.
     guard timeObserverToken == nil else { return }
     
-    // 4.
+    // 3.
     let interval = CMTime(seconds: self.interval, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
     timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) { [weak self] time in
         guard let self = self, let subscriber = self.subscriber else { return }
-        // 5.
+        // 4.
         self.requested -= .max(1)
-        // 6.
+        // 5.
         let newDemand = subscriber.receive(time.seconds)
         self.requested += newDemand
-        // 7.
+        // 6.
         self.completeIfNeeded()
     }
 }
@@ -181,12 +179,11 @@ func request(_ demand: Subscribers.Demand) {
 
 Okay, that's a lot of new code, let's go over the changes:
 1. When the Subscriber requests values, it can specify how many values it wants by passing the initial demand. The Subscription is responsible for keeping track of the demand, so you'll increment `requested` by the received amount.
-2. This is an early return opportunity: if no values are requested, the Subscription can complete immediately.
-3. The goal is to only start emitting events once a Subscriber is attached to a Publisher. If `timeObserverToken` is nil, that means that the Subscription hasn't started producing values yet.
-4. At this point the Subscription starts to query the playback progress, with the frequency specified in `interval`.
-5. Once there is a new value to emit, `requested` is decremented to avoid sending more values than needed.
-6. The value is then delivered to the Subscriber (**Step 4** in the event sequence). Upon receiving a value, the Subscriber may choose to update the demand, so the Subscription must update `requested` to keep up with the new demand.
-7. If no more values are requested, the Subscription can complete (**The final step of the event sequence**).
+2. The goal is to only start emitting events once a Subscriber is attached to a Publisher. If `timeObserverToken` is nil, that means that the Subscription hasn't started producing values yet. Checking the demand is also important: it could be that you're dealing with a custom Subscriber instance which only requests values if a certain condition is true: your Subscription shouldn't complete right away, just defer the work until there's actual demand for values.
+3. At this point the Subscription starts to query the playback progress, with the frequency specified in `interval`.
+4. Once there is a new value to emit, `requested` is decremented to avoid sending more values than needed.
+5. The value is then delivered to the Subscriber (**Step 4** in the event sequence). Upon receiving a value, the Subscriber may choose to update the demand, so the Subscription must update `requested` to keep up with the new demand.
+6. If no more values are requested, the Subscription can complete (**The final step of the event sequence**).
 
 Notice how it's entirely up to the Subscribtion implementation to honor the demand. This is a crucial point: if you forget to decrement `requested`, the Subscriber may emit more values than requested; if you don't keep track of the updated demand, the Subscriber can end up delivering fewer values. There is no automatic behavior you can rely on to update the demand, and manual bookkeeping can be error-prone, which is why it's important to unit test your custom Publishers, which will be covered in Part 2 of the series.
 
