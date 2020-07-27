@@ -98,7 +98,7 @@ extension Publishers {
 }
 ```
 
-Notice how the type signature restricts the Subscriber's Input to be `TimeInterval`. Xcode will step in agan, offering to add stubs for a couple of methods:
+Notice how the type signature restricts the Subscriber's Input to be `TimeInterval`. Xcode will step in again, offering to add stubs for a couple of methods:
 
 ```swift
 private final class PlayheadProgressSubscription<S: Subscriber>: Subscription where S.Input == TimeInterval {
