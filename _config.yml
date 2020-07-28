@@ -23,7 +23,7 @@ email: jozsef.vesza@outlook.com
 description: >- # this means to ignore newlines until "baseurl:"
   This blog covers varous topics in iOS development. Currently covering: Swift, SwiftUI, and Combine.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://jozsef-vesza.dev" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: j_vesza
 github_username:  jozsef-vesza
 show_excerpts: true
@@ -35,6 +35,7 @@ plugins:
   - jekyll-avatar
   - jekyll-feed
   - jekyll-paginate
+  - jekyll-sitemap
 
 # About/contact
 author:
