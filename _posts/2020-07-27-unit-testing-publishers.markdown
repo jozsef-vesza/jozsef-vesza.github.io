@@ -70,7 +70,7 @@ class MockAVPlayer: AVPlayer {
 Let's look at how it works:
 1. You'll hook into the AVPlayer's `addPeriodicTimeObserver(forInterval:queue:using:)` method. `PlayheadProgressPublisher` invokes this method when subscribed to, so you can be sure that the hook will be executed. 
 2. The default implementation invokes the `block` parameter periodically to post updates. Your mock captures this closure into a property, so you can freely invoke it with arbitrary values in your tests.
-3. `AVPlayer` returns an observer token, which `PlayheadProgressPublisher` uses to stop the progress updates: you invoke the default implementation here to make sure that the returned value is correct (otherwise `removeTimeObserver(_:)` could crash).
+3. `AVPlayer` returns an observer token, which is later used to stop the progress updates. Since it's an opaque value, it's better to invoke the default implementation to make sure it's correct.
 
 With the mock in place, it's time to add some setup code to your test case:
 ```swift
