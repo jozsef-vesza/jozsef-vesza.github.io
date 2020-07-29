@@ -88,7 +88,7 @@
     top: 9px;
     right: $spacing-unit / 2;
     background-color: $background-color;
-    border: 1px solid $primary-color-lighter;
+    border: 1px solid transparent;
     border-radius: 5px;
     text-align: right;
 
@@ -111,7 +111,7 @@
       text-align: center;
 
       > svg {
-        fill: $primary-color-darker;
+        fill: $primary-color;
       }
     }
 
@@ -133,6 +133,61 @@
         margin-right: 0;
       }
       margin-left: 20px;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    @include media-query($on-palm) {
+      position: absolute;
+      top: 9px;
+      right: $spacing-unit / 2;
+      background-color: $background-color-dark;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      text-align: right;
+
+      label[for="nav-trigger"] {
+        display: block;
+        float: right;
+        width: 36px;
+        height: 36px;
+        z-index: 2;
+        cursor: pointer;
+      }
+
+      .menu-icon {
+        display: block;
+        float: right;
+        width: 36px;
+        height: 26px;
+        line-height: 0;
+        padding-top: 10px;
+        text-align: center;
+
+        > svg {
+          fill: $primary-color-dark;
+        }
+      }
+
+      input ~ .trigger {
+        clear: both;
+        display: none;
+      }
+
+      input:checked ~ .trigger {
+        display: block;
+        padding-bottom: 5px;
+      }
+
+      .page-link {
+        display: block;
+        padding: 5px 10px;
+
+        &:not(:last-child) {
+          margin-right: 0;
+        }
+        margin-left: 20px;
+      }
     }
   }
 }
