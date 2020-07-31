@@ -17,20 +17,22 @@ There are multiple ways for creating your own Publishers: you can use the `@Publ
 
 Let's have a look at Combine's the key components.
 
-#### Publishers
+### Publishers
 
 A Publisher represents a type that delivers values over time to Subscribers. A Publisher's job is to accept a Subscriber, which it will later notify as events occur. Combine also offers various operators; these are Publishers, that receive data from an upstream Publishers, manipulate the data (e.g. map the received values to another type), and sends the results downstream.
 
-#### Subscribers
+### Subscribers
 
 A Subscriber receives values from a Publishers. Along with those values, it may also receive lifecycle events (such as completion). Combine provides two built-in Subscriber implementation:
 * `sink(receiveCompletion:receiveValue:)`: to execute arbitrary work as events occur
 * `assign(to:on:)`: to assign received values to a key path of an object.
 It's also possible to create your own Subscriber, which will be covered later in the series.
 
-#### Subscriptions
+### Subscriptions
 
 Subscriptions represent the connection between a Publisher and a Subscriber. You'll look at Subscribers in detail when implementing a Publisher.
+
+### Sequence of Events
 
 These components operate together following a sequence of events:
 1. Subscriber subscribes to a Publisher
