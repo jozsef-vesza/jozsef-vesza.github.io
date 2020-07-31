@@ -4,6 +4,7 @@
 .site-header {
   border-top: 5px solid $primary-color;
   min-height: $spacing-unit * 1.865;
+  background-color: $background-color;
 
   // Positioning context for the mobile navigation icon
   position: relative;
@@ -13,6 +14,7 @@
   .site-header {
     border-top: 5px solid $primary-color-dark;
     min-height: $spacing-unit * 1.865;
+    background-color: $background-color-dark;
   
     // Positioning context for the mobile navigation icon
     position: relative;
@@ -193,8 +195,17 @@
 }
 
 footer {
-  margin-bottom: 2rem;
-	text-align: center;
+  padding-bottom: 2rem;
+  text-align: center;
+  background-color: $background-color;
+}
+
+@media (prefers-color-scheme: dark) {
+  footer {
+    padding-bottom: 2rem;
+    text-align: center;
+    background-color: $background-color-dark;
+  }
 }
 
 footer img.avatar {
