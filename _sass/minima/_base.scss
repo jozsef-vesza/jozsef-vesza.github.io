@@ -29,12 +29,14 @@ body {
   display: flex;
   min-height: 100vh;
   flex-direction: column;
+  background-clip: border-box;
 }
 
 @media (prefers-color-scheme: dark) {
   body {
     color: $text-color-dark;
     background-color: $primary-color-dark;
+    background-clip: border-box;
   }
 }
 
