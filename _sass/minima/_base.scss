@@ -19,7 +19,7 @@ dl, dd, ol, ul, figure {
 body {
   font: $base-font-weight #{$base-font-size}/#{$base-line-height} $base-font-family;
   color: $text-color;
-  background-color: $background-color;
+  background-color: $primary-color;
   -webkit-text-size-adjust: 100%;
   -webkit-font-feature-settings: "kern" 1;
      -moz-font-feature-settings: "kern" 1;
@@ -34,7 +34,7 @@ body {
 @media (prefers-color-scheme: dark) {
   body {
     color: $text-color-dark;
-    background-color: $background-color-dark;
+    background-color: $primary-color-dark;
   }
 }
 
@@ -57,6 +57,14 @@ ul, ol, dl, figure,
  */
 main {
   display: block; /* Default value of `display` of `main` element is 'inline' in IE 11. */
+  background-color: $background-color;
+}
+
+@media (prefers-color-scheme: dark) {
+  main {
+    display: block; /* Default value of `display` of `main` element is 'inline' in IE 11. */
+    background-color: $background-color-dark;
+  }
 }
 
 
@@ -275,6 +283,7 @@ pre code {
   margin-left: auto;
   padding-right: $spacing-unit;
   padding-left: $spacing-unit;
+  padding-top: 10px;
   @extend %clearfix;
 
   @include media-query($on-laptop) {
