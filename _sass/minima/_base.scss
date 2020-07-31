@@ -283,6 +283,7 @@ pre code {
   margin-left: auto;
   padding-right: $spacing-unit;
   padding-left: $spacing-unit;
+  padding-top: 10px;
   @extend %clearfix;
 
   @include media-query($on-laptop) {
