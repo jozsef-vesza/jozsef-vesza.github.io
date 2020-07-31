@@ -163,3 +163,95 @@ class TestSubscriber: Subscriber {
     }
 }
 ```
+
+Before moving on, add the following properties to `TestSubscriber`:
+```swift
+class TestSubscriber<Int>: Subscriber {
+    private let demand: Int
+    private let onComplete: ([Int]) -> Void
+    
+    private var receivedValues: [Int] = []
+    private var subscription: Subscription? = nil
+
+    init(demand: Int, onComplete: @escaping (_ receivedValues: [T]) -> Void) {
+        self.demand = demand
+        self.onComplete = onComplete
+    }
+    ...
+}
+```
+Let's look at the properties one by one:
+* `demand`: the purpose of this Subscriber implementation is to gain control over the demand, so it will receive the demand as an `init` parameter.
+* `onComplete`: this closure will be invoked when the Subscription completes.
+* `receivedValues`: this array will hold the values received from the Publisher. Upon completion, it will be passed via `onComplete`.
+* `subscription`: the Subscriber needs to hold a strong reference to the Subscription to prevent it from being deallocated.
+
+The next part will build heavily on the sequence of events described in [Part 1](https://jozsef-vesza.dev/2020/07/24/creating-a-custom-combine-publisher/), feel free to check it out if you need a refresher. Let's look at the method stubs.
+
+### Receiving the Subscribtion
+
+Once the Publisher has configured the Subscription, it will pass it back to the Subscriber by calling `receive(subscription:)`. When the Subscriber receives the Subscription, it can start asking for values. It also has to retain the Subscription, otherwise it would get deallocated. Update the body of `receive(subscription:)` to match these requirements:
+```swift
+func receive(subscription: Subscription) {
+    self.subscription = subscription
+    subscription.request(.max(demand))
+}
+```
+
+### Receiving values
+
+When the Publisher produces a value, it passes it to the Subscriber by calling `receive(_:)`. The Subscriber can then process the value, and optionally update the demand. Update the body of `receive(_:)` to the following:
+```swift
+func receive(_ input: T) -> Subscribers.Demand {
+    receivedValues.append(input)
+    return .none
+}
+```
+The Subscriber will keep track of the values received, and not request more values. In its current state, `TestSubscriber` will work with the demand passed in during initialization, and will not change it dynamically.
+
+### Receiving completion
+
+Finally, fill out the implementation of `receive(completion:)`:
+```swift
+func receive(completion: Subscribers.Completion<Never>) {
+    onComplete(receivedValues)
+    subscription = nil
+}
+```
+The Publisher will call `receive(completion:)` when it finishes (either normally or with an error). Your implementation will invoke the completion handler, and nil out its reference to the Subscription. The latter step is important to break the retain cycle between the Subscriber and the Subscription.
+
+## Testing with arbitrary demand
+
+Now it's time to add a test for the scenario where a fixed number of values are requested. Add the following test method to your test case:
+```swift
+func testWhenTwoValuesAreRequested_ItCompletesAfterEmittingTwoValues() {
+    // 1.
+    let expectedValues: [TimeInterval] = [1, 2]
+    var receivedValues: [TimeInterval] = []
+    
+    // 2.
+    let subscriber = TestSubscriber(demand: 2) { values in
+        receivedValues = values
+    }
+    
+    sut.subscribe(subscriber)
+    
+    let timeUpdates: [TimeInterval] = [1, 2, 3, 4, 5]
+    
+    // 3.
+    timeUpdates.forEach { time in player.updateClosure?(CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))) }
+    
+    // 4.
+    XCTAssertEqual(receivedValues, expectedValues)
+}
+```
+
+Let's look at it in detail:
+1. Just as before, you establish the expected result, and declare an array to hold the received values.
+2. You initialize a `TestSubscriber` instance which will request two values.
+3. To verify that the Publisher doesn't send more values than needed, you'll use the mocked `updateClosure` to produce five values.
+4. Finally, you'll validate the received values.
+
+Run your test now, it should succeed.
+
+## Dynamically changing the demand
