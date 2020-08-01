@@ -251,4 +251,9 @@ player.playheadProgressPublisher()
 
 ## Conclusion
 
-I hope you enjoyed this guide on custom Publishers. It may seem like a lot to digest at first, so definitely take your time to play around with the concept, try to apply it on some of your own existing code. As noted previously, it's definitely a good idea to back your Publisher implementations up with unit tests, and in Part 2, you'll learn about how to just that.
+I hope you enjoyed this guide on custom Publishers. It may seem like a lot to digest at first, so definitely take your time to play around with the concept, try to apply it on some of your own existing code. 
+
+
+If you would like to see these topics in context, check out [the full project on GitHub](https://github.com/jozsef-vesza/AVFoundation-Combine), which contains all the code discussed here, and has an example app you can play around.
+
+As noted previously, it's definitely a good idea to back your Publisher implementations up with unit tests, and in Part 2, you'll learn about how to just that.

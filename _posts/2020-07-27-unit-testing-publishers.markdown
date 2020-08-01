@@ -367,4 +367,8 @@ The goal of this test is to request a single value initially, and request an add
 
 ## Conclusion
 
-By following along, you've covered all the possible use cases of a custom Publisher with tests, which will allow you to be more confident in your implementation. Along the way you've learned about Combine's demand system, and implemented a custom Subscriber: although it was only used to support the unit tests, you may find yourself using such a Subscriber in a real-life scenario as well, when you need more control over the behavior of Publishers. I hope this knowledge will serve you well when working with Combine in the wild. If you have any questions or feedback about the topics covered in this series, do not hesitate to reach out to me on [Twitter](https://twitter.com/j_vesza), I would love to hear it.
+By following along, you've covered all the possible use cases of a custom Publisher with tests, which will allow you to be more confident in your implementation. Along the way you've learned about Combine's demand system, and implemented a custom Subscriber: although it was only used to support the unit tests, you may find yourself using such a Subscriber in a real-life scenario as well, when you need more control over the behavior of Publishers. 
+
+
+If you would like to see these topics in context, check out [the full project on GitHub](https://github.com/jozsef-vesza/AVFoundation-Combine), which contains all the code discussed here, and has an example app you can play around.
+I hope this knowledge will serve you well when working with Combine in the wild. If you have any questions or feedback about the topics covered in this series, do not hesitate to reach out to me on [Twitter](https://twitter.com/j_vesza), I would love to hear it.
