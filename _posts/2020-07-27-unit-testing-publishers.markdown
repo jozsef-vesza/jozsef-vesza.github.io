@@ -254,4 +254,117 @@ Let's look at it in detail:
 
 Run your test now, it should succeed.
 
-## Dynamically changing the demand
+## Delaying the Publisher's work
+
+The following test will add another twist to the setup: the initial demand will be zero, but you'll request additional values later. This will validate that the Publisher doesn't start emitting values prematurely. In order to manipulate the demand on the fly, add the following method to `TestSubscriber`:
+```swift
+func startRequestingValues(_ demand: Int) {
+    guard let subscription = subscription else {
+        fatalError("requestValues(_:) may only be called after subscribing")
+    }
+    subscription.request(.max(demand))
+}
+```
+
+The method makes sure that the subscription already exists, then requests the specified values.
+
+Now add the following test method:
+```swift
+    func testWhenDemandIsZero_ItEmitsNoValues() {
+        let expectedValues: [TimeInterval] = []
+        var receivedValues: [TimeInterval] = []
+        
+        let subscriber = TestSubscriber(demand: 0) { values in
+            receivedValues = values
+        }
+        
+        sut.subscribe(subscriber)
+        
+        let timeUpdates: [TimeInterval] = [1, 2, 3, 4, 5]
+        timeUpdates.forEach { time in player.updateClosure?(CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))) }
+        
+        XCTAssertEqual(receivedValues, expectedValues)
+    }
+```
+
+This test verifies that the Publisher doesn't start emitting values if the initial demand is zero. To test modifying the demand, you'll use a slightly tweaked variation of the same method:
+
+```swift
+    func testWhenInitialDemandIsZero_AndThenFiveValuesAreRequested_ItEmitsFiveValues() {
+        let expectedValues: [TimeInterval] = [1, 2, 3, 4, 5]
+        var receivedValues: [TimeInterval] = []
+        
+        let subscriber = TestSubscriber<TimeInterval>(demand: 0) { values in
+            receivedValues = values
+        }
+        
+        sut.subscribe(subscriber)
+        
+        let timeUpdates: [TimeInterval] = [1, 2, 3, 4, 5]
+
+        // Request more values
+        subscriber.startRequestingValues(5)
+        
+        timeUpdates.forEach { time in player.updateClosure?(CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))) }
+        
+        XCTAssertEqual(receivedValues, expectedValues)
+    }
+```
+
+The only notable difference is that in this test you request five more values after the initial subscription.
+
+## Updating the demand when a value is received
+
+There is still a gap in the implementation to cover: when a Publisher sends a value by calling `receive(_:)`, the Subscriber has a change to return an updated demand. One important thing to note here is that the new demand will be added to the existing one. So if the Subscriber initially demands two values, there's no way to decrement that demand; you can return `none` to keep the demand as is, or specify the additional demand. 
+
+In order to test this setup, you'll need to hook into the `receive(_:)` method of the Subscriber. Add the following changes to the implementation of `TestSubscriber`:
+```swift
+class TestSubscriber: Subscriber {
+    ...
+    private let onValueReceived: (Int) -> Int
+    ...
+    init(demand: Int,
+         onValueReceived: @escaping (_ receivedValue: Int) -> Int,
+         onComplete: @escaping (_ receivedValues: [Int]) -> Void) {
+        self.demand = demand
+        self.onComplete = onComplete
+        self.onValueReceived = onValueReceived
+    }
+    ...
+}
+```
+A new closure, `onValueReceived` will provide a hook for updating the demand. Update the implementation of `receive(_:)`:
+```swift
+func receive(_ input: Int) -> Subscribers.Demand {
+    receivedValues.append(input)
+    let newDemand = onValueReceived(input)
+    return .max(newDemand)
+}
+```
+The new implementation acquires the updated themand demand by invoking `onValueReceived`, and passes it back to the Publisher.
+
+To verify the behavior, add the following test method:
+```swift
+    func testWhenInitialDemandIsOne_AndAnAdditionalValueIsRequested_ItEmitsTwoValues() {
+        let expectedValues: [TimeInterval] = [1, 2]
+        var receivedValues: [TimeInterval] = []
+        
+        let subscriber = TestSubscriber<TimeInterval>(demand: 1, onValueReceived: { value in
+            return value == 1 ? 1 : 0
+        }, onComplete: { values in
+            receivedValues = values
+        })
+        sut.subscribe(subscriber)
+        
+        let timeUpdates: [TimeInterval] = [1, 2, 3, 4, 5]
+        timeUpdates.forEach { time in player.updateClosure?(CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))) }
+        
+        XCTAssertEqual(receivedValues, expectedValues)
+    }
+```
+
+The goal of this test is to request a single value initially, and request an additional one upon receiving it. So it checks the value received, and asks for another one if it equals one.
+
+## Conclusion
+
+By following along, you've covered all the possible use cases of a custom Publisher with tests, which will allow you to be more confident in your implementation. Along the way you've learned about Combine's demand system, and implemented a custom Subscriber: although it was only used to support the unit tests, you may find yourself using such a Subscriber in a real-life scenario as well, when you need more control over the behavior of Publishers. I hope this knowledge will serve you well when working with Combine in the wild. If you have any questions or feedback about the topics covered in this series, do not hesitate to reach out to me on [Twitter](https://twitter.com/j_vesza), I would love to hear it.
