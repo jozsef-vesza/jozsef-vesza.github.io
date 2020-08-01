@@ -36,8 +36,8 @@ func request(_ demand: Subscribers.Demand) {
 
 Looking at the marked lines, it's becoming clear that the responsibility of coping with the demand falls entirely on the Subscription implementation:
 1. First, it registers the initial demand.
-2. As a value is delivered to the Subscriber, it updates the demand to avoid sending too many values.
-3. The subscriber may choose to increment the demand, so the Subscription updates `requested` to keep up.
+2. When a value is sent to the Subscriber, it updates the demand to avoid sending too many values.
+3. The Subscriber may choose to increment the demand, so the Subscription updates the value stored in `requested` to keep up.
 4. Finally, if no more values are requested, the Subscription can complete.
 
 To cover all theses cases, you could divide the tests into the following categories:
@@ -45,7 +45,7 @@ To cover all theses cases, you could divide the tests into the following categor
 * Tests, that work with a fixed demand: it's fairly common that a Subscriber wants to limit the number of values emitted by a Publisher. Your tests need to verify that the Publisher emits the correct amount of values, and completes afterwards.
 * Tests, that dynamically change the demand: a more advanced scenario is to update the demand during a Subscription's lifetime. This can be useful for heavier tasks, where the Publisher emits so many values that the Subscriber has a hard time keeping up. In this guide you'll create tests for the case where the demand is initially zero, but later increased.
 
-## Setting up the tests
+## Setting Up the Tests
 
 `PlayheadProgressPublisher` relies on AVPlayer to provide progress updates. In order to test its behavior properly, you need to be able to take control over these updates. Add the following implementation to your unit test case:
 
@@ -98,7 +98,7 @@ class PlayheadProgressPublisherTests: XCTestCase {
 
 Now that the setup is done, it's time to write your first test.
 
-## Testing with sink
+## Testing With Sink
 
 Add the following test method to your test case:
 ```swift
@@ -143,7 +143,7 @@ class TestSubscriber: Subscriber {
 }
 ```
 
-This bit just declares the types of values and errors you're interested in: it must match the Publisher's emitted types, so you'll use `TimeInterval` and `Never`. You'll notice a few build errors now; again, you'll rely on Xcode's fix-its to show the path forward. After applying them, you should see three new method stubs:
+This bit just declares the types of values and errors you're interested in: it must match the Publisher's emitted types, so you'll use `TimeInterval` and `Never`. You'll notice a few build errors now; Xcode's fix-its to show the path forward. After applying them, you should see three new method stubs:
 
 ```swift
 class TestSubscriber: Subscriber {
@@ -166,14 +166,14 @@ class TestSubscriber: Subscriber {
 
 Before moving on, add the following properties to `TestSubscriber`:
 ```swift
-class TestSubscriber<Int>: Subscriber {
+class TestSubscriber: Subscriber {
     private let demand: Int
     private let onComplete: ([Int]) -> Void
     
     private var receivedValues: [Int] = []
     private var subscription: Subscription? = nil
 
-    init(demand: Int, onComplete: @escaping (_ receivedValues: [T]) -> Void) {
+    init(demand: Int, onComplete: @escaping (_ receivedValues: [Int]) -> Void) {
         self.demand = demand
         self.onComplete = onComplete
     }
@@ -198,18 +198,18 @@ func receive(subscription: Subscription) {
 }
 ```
 
-### Receiving values
+### Receiving Values
 
 When the Publisher produces a value, it passes it to the Subscriber by calling `receive(_:)`. The Subscriber can then process the value, and optionally update the demand. Update the body of `receive(_:)` to the following:
 ```swift
-func receive(_ input: T) -> Subscribers.Demand {
+func receive(_ input: Int) -> Subscribers.Demand {
     receivedValues.append(input)
     return .none
 }
 ```
 The Subscriber will keep track of the values received, and not request more values. In its current state, `TestSubscriber` will work with the demand passed in during initialization, and will not change it dynamically.
 
-### Receiving completion
+### Receiving Completion
 
 Finally, fill out the implementation of `receive(completion:)`:
 ```swift
@@ -220,7 +220,7 @@ func receive(completion: Subscribers.Completion<Never>) {
 ```
 The Publisher will call `receive(completion:)` when it finishes (either normally or with an error). Your implementation will invoke the completion handler, and nil out its reference to the Subscription. The latter step is important to break the retain cycle between the Subscriber and the Subscription.
 
-## Testing with arbitrary demand
+## Testing With Arbitrary Demand
 
 Now it's time to add a test for the scenario where a fixed number of values are requested. Add the following test method to your test case:
 ```swift
@@ -254,7 +254,7 @@ Let's look at it in detail:
 
 Run your test now, it should succeed.
 
-## Delaying the Publisher's work
+## Delaying the Publisher’s Work
 
 The following test will add another twist to the setup: the initial demand will be zero, but you'll request additional values later. This will validate that the Publisher doesn't start emitting values prematurely. In order to manipulate the demand on the fly, add the following method to `TestSubscriber`:
 ```swift
@@ -313,9 +313,9 @@ This test verifies that the Publisher doesn't start emitting values if the initi
 
 The only notable difference is that in this test you request five more values after the initial subscription.
 
-## Updating the demand when a value is received
+## Updating the Demand When a Value Is Received
 
-There is still a gap in the implementation to cover: when a Publisher sends a value by calling `receive(_:)`, the Subscriber has a change to return an updated demand. One important thing to note here is that the new demand will be added to the existing one. So if the Subscriber initially demands two values, there's no way to decrement that demand; you can return `none` to keep the demand as is, or specify the additional demand. 
+There is still a gap in the implementation to cover: when a Publisher sends a value by calling `receive(_:)`, the Subscriber has a chance to return an updated demand. One important thing to note here is that the new demand will be added to the existing one. So if the Subscriber initially demands two values, there's no way to decrement that demand; you can return `none` to keep the demand as is, or specify the additional demand. 
 
 In order to test this setup, you'll need to hook into the `receive(_:)` method of the Subscriber. Add the following changes to the implementation of `TestSubscriber`:
 ```swift
@@ -333,7 +333,7 @@ class TestSubscriber: Subscriber {
     ...
 }
 ```
-A new closure, `onValueReceived` will provide a hook for updating the demand. Update the implementation of `receive(_:)`:
+A new closure, `onValueReceived` will allow tests top update the demand. Update the implementation of `receive(_:)`:
 ```swift
 func receive(_ input: Int) -> Subscribers.Demand {
     receivedValues.append(input)
@@ -341,7 +341,7 @@ func receive(_ input: Int) -> Subscribers.Demand {
     return .max(newDemand)
 }
 ```
-The new implementation acquires the updated themand demand by invoking `onValueReceived`, and passes it back to the Publisher.
+The new implementation acquires the updated demand by invoking `onValueReceived`, and passes it back to the Publisher.
 
 To verify the behavior, add the following test method:
 ```swift
