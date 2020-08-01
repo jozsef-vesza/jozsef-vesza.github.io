@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Combine Publishers, Part 1: Creating a Publisher"
+title:  "Combine Publishers, Part 1: Creating a Custom Publisher"
 date:   2020-07-24
 categories: posts
 ---
