@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Combine Publishers, Part 2: Unit Testing Custom Publishers"
-date:   2020-07-27
+date:   2020-08-01
 categories: posts
 ---
 
