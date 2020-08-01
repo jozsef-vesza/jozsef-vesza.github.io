@@ -256,4 +256,4 @@ I hope you enjoyed this guide on custom Publishers. It may seem like a lot to di
 
 If you would like to see these topics in context, check out [the full project on GitHub](https://github.com/jozsef-vesza/AVFoundation-Combine), which contains all the code discussed here, and has an example app you can play around.
 
-As noted previously, it's definitely a good idea to back your Publisher implementations up with unit tests, and in Part 2, you'll learn about how to just that.
+As noted previously, it's definitely a good idea to back your Publisher implementations up with unit tests, and in [Part 2](https://jozsef-vesza.dev/2020/08/01/unit-testing-publishers/), you'll learn about how to just that.
