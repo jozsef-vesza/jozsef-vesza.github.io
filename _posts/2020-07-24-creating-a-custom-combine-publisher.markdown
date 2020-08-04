@@ -19,7 +19,7 @@ Let's have a look at Combine's the key components.
 
 ### Publishers
 
-A Publisher represents a type that delivers values over time to Subscribers. A Publisher's job is to accept a Subscriber, which it will later notify as events occur. Combine also offers various operators; these are Publishers, that receive data from an upstream Publishers, manipulate the data (e.g. map the received values to another type), and sends the results downstream.
+A Publisher represents a type that delivers values over time to Subscribers. A Publisher's job is to accept a Subscriber, which it will later notify as events occur. Combine also offers various operators; these are Publishers, that receive data from an upstream Publishers, manipulate the data (e.g. map the received values to another type), and send the results downstream.
 
 ### Subscribers
 

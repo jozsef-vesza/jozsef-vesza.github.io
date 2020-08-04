@@ -270,45 +270,45 @@ The method makes sure that the subscription already exists, then requests the sp
 
 Now add the following test method:
 ```swift
-    func testWhenDemandIsZero_ItEmitsNoValues() {
-        let expectedValues: [TimeInterval] = []
-        var receivedValues: [TimeInterval] = []
-        
-        let subscriber = TestSubscriber(demand: 0) { values in
-            receivedValues = values
-        }
-        
-        sut.subscribe(subscriber)
-        
-        let timeUpdates: [TimeInterval] = [1, 2, 3, 4, 5]
-        timeUpdates.forEach { time in player.updateClosure?(CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))) }
-        
-        XCTAssertEqual(receivedValues, expectedValues)
+func testWhenDemandIsZero_ItEmitsNoValues() {
+    let expectedValues: [TimeInterval] = []
+    var receivedValues: [TimeInterval] = []
+    
+    let subscriber = TestSubscriber(demand: 0) { values in
+        receivedValues = values
     }
+    
+    sut.subscribe(subscriber)
+    
+    let timeUpdates: [TimeInterval] = [1, 2, 3, 4, 5]
+    timeUpdates.forEach { time in player.updateClosure?(CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))) }
+    
+    XCTAssertEqual(receivedValues, expectedValues)
+}
 ```
 
 This test verifies that the Publisher doesn't start emitting values if the initial demand is zero. To test modifying the demand, you'll use a slightly tweaked variation of the same method:
 
 ```swift
-    func testWhenInitialDemandIsZero_AndThenFiveValuesAreRequested_ItEmitsFiveValues() {
-        let expectedValues: [TimeInterval] = [1, 2, 3, 4, 5]
-        var receivedValues: [TimeInterval] = []
-        
-        let subscriber = TestSubscriber<TimeInterval>(demand: 0) { values in
-            receivedValues = values
-        }
-        
-        sut.subscribe(subscriber)
-        
-        let timeUpdates: [TimeInterval] = [1, 2, 3, 4, 5]
-
-        // Request more values
-        subscriber.startRequestingValues(5)
-        
-        timeUpdates.forEach { time in player.updateClosure?(CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))) }
-        
-        XCTAssertEqual(receivedValues, expectedValues)
+func testWhenInitialDemandIsZero_AndThenFiveValuesAreRequested_ItEmitsFiveValues() {
+    let expectedValues: [TimeInterval] = [1, 2, 3, 4, 5]
+    var receivedValues: [TimeInterval] = []
+    
+    let subscriber = TestSubscriber<TimeInterval>(demand: 0) { values in
+        receivedValues = values
     }
+    
+    sut.subscribe(subscriber)
+    
+    let timeUpdates: [TimeInterval] = [1, 2, 3, 4, 5]
+
+    // Request more values
+    subscriber.startRequestingValues(5)
+    
+    timeUpdates.forEach { time in player.updateClosure?(CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))) }
+    
+    XCTAssertEqual(receivedValues, expectedValues)
+}
 ```
 
 The only notable difference is that in this test you request five more values after the initial subscription.
@@ -345,22 +345,22 @@ The new implementation acquires the updated demand by invoking `onValueReceived`
 
 To verify the behavior, add the following test method:
 ```swift
-    func testWhenInitialDemandIsOne_AndAnAdditionalValueIsRequested_ItEmitsTwoValues() {
-        let expectedValues: [TimeInterval] = [1, 2]
-        var receivedValues: [TimeInterval] = []
-        
-        let subscriber = TestSubscriber<TimeInterval>(demand: 1, onValueReceived: { value in
-            return value == 1 ? 1 : 0
-        }, onComplete: { values in
-            receivedValues = values
-        })
-        sut.subscribe(subscriber)
-        
-        let timeUpdates: [TimeInterval] = [1, 2, 3, 4, 5]
-        timeUpdates.forEach { time in player.updateClosure?(CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))) }
-        
-        XCTAssertEqual(receivedValues, expectedValues)
-    }
+func testWhenInitialDemandIsOne_AndAnAdditionalValueIsRequested_ItEmitsTwoValues() {
+    let expectedValues: [TimeInterval] = [1, 2]
+    var receivedValues: [TimeInterval] = []
+    
+    let subscriber = TestSubscriber<TimeInterval>(demand: 1, onValueReceived: { value in
+        return value == 1 ? 1 : 0
+    }, onComplete: { values in
+        receivedValues = values
+    })
+    sut.subscribe(subscriber)
+    
+    let timeUpdates: [TimeInterval] = [1, 2, 3, 4, 5]
+    timeUpdates.forEach { time in player.updateClosure?(CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))) }
+    
+    XCTAssertEqual(receivedValues, expectedValues)
+}
 ```
 
 The goal of this test is to request a single value initially, and request an additional one upon receiving it. So it checks the value received, and asks for another one if it equals one.
