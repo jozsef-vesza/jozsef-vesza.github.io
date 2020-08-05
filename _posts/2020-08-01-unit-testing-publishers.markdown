@@ -20,25 +20,25 @@ func request(_ demand: Subscribers.Demand) {
     
     let interval = CMTime(seconds: self.interval, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
     timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) { [weak self] time in
-        guard let self = self, let subscriber = self.subscriber else { return }
         // 2.
+        guard 
+            let self = self, 
+            let subscriber = self.subscriber, 
+            self.requested > .none else { return }
+        // 3.
         self.requested -= .max(1)
         let newDemand = subscriber.receive(time.seconds)
-        // 3.
-        self.requested += newDemand
         // 4.
-        if self.requested == .none {
-            subscriber.receive(completion: .finished)
-        }
+        self.requested += newDemand
     }
 }
 ```
 
 Looking at the marked lines, it's becoming clear that the responsibility of coping with the demand falls entirely on the Subscription implementation:
 1. First, it registers the initial demand.
-2. When a value is sent to the Subscriber, it updates the demand to avoid sending too many values.
-3. The Subscriber may choose to increment the demand, so the Subscription updates the value stored in `requested` to keep up.
-4. Finally, if no more values are requested, the Subscription can complete.
+2. When a value is sent to the Subscriber, it first checks if there'a a demand to fulfill.
+3. Then, it updates the demand to avoid sending too many values.
+4. The Subscriber may choose to increment the demand, so the Subscription updates the value stored in `requested` to keep up.
 
 To cover all theses cases, you could divide the tests into the following categories:
 * Tests, that work with unlimited demand: The most common use case for Publishers is to subscribe using `sink(receiveCompletion:receiveValue:)`, and handle values as they are emitted. So you'll have to make sure that your Publisher works well with this setup.
@@ -168,22 +168,20 @@ Before moving on, add the following properties to `TestSubscriber`:
 ```swift
 class TestSubscriber: Subscriber {
     private let demand: Int
-    private let onComplete: ([Int]) -> Void
+    private let onValueReceived: (Int) -> Void
     
-    private var receivedValues: [Int] = []
     private var subscription: Subscription? = nil
 
-    init(demand: Int, onComplete: @escaping (_ receivedValues: [Int]) -> Void) {
+    init(demand: Int, onValueReceived: @escaping (_ receivedValue: Int) -> Void) {
         self.demand = demand
-        self.onComplete = onComplete
+        self.receivedValues = receivedValues
     }
     ...
 }
 ```
 Let's look at the properties one by one:
 * `demand`: the purpose of this Subscriber implementation is to gain control over the demand, so it will receive the demand as an `init` parameter.
-* `onComplete`: this closure will be invoked when the Subscription completes.
-* `receivedValues`: this array will hold the values received from the Publisher. Upon completion, it will be passed via `onComplete`.
+* `onValueReceived`: this closure will be invoked as values are received from the Publisher.
 * `subscription`: the Subscriber needs to hold a strong reference to the Subscription to prevent it from being deallocated.
 
 The next part will build heavily on the sequence of events described in [Part 1](https://jozsef-vesza.dev/2020/07/24/creating-a-custom-combine-publisher/), feel free to check it out if you need a refresher. Let's look at the method stubs.
@@ -203,18 +201,17 @@ func receive(subscription: Subscription) {
 When the Publisher produces a value, it passes it to the Subscriber by calling `receive(_:)`. The Subscriber can then process the value, and optionally update the demand. Update the body of `receive(_:)` to the following:
 ```swift
 func receive(_ input: Int) -> Subscribers.Demand {
-    receivedValues.append(input)
     return .none
 }
 ```
-The Subscriber will keep track of the values received, and not request more values. In its current state, `TestSubscriber` will work with the demand passed in during initialization, and will not change it dynamically.
+In its current state, `TestSubscriber` will work with the demand passed in during initialization, and will not change it dynamically.
 
 ### Receiving Completion
 
 Finally, fill out the implementation of `receive(completion:)`:
 ```swift
 func receive(completion: Subscribers.Completion<Never>) {
-    onComplete(receivedValues)
+    onComplete()
     subscription = nil
 }
 ```
@@ -230,8 +227,8 @@ func testWhenTwoValuesAreRequested_ItCompletesAfterEmittingTwoValues() {
     var receivedValues: [TimeInterval] = []
     
     // 2.
-    let subscriber = TestSubscriber(demand: 2) { values in
-        receivedValues = values
+    let subscriber = TestSubscriber(demand: 2) { value in
+        receivedValues.append(value)
     }
     
     sut.subscribe(subscriber)
@@ -274,8 +271,8 @@ func testWhenDemandIsZero_ItEmitsNoValues() {
     let expectedValues: [TimeInterval] = []
     var receivedValues: [TimeInterval] = []
     
-    let subscriber = TestSubscriber(demand: 0) { values in
-        receivedValues = values
+    let subscriber = TestSubscriber(demand: 0) { value in
+        receivedValues.append(value)
     }
     
     sut.subscribe(subscriber)
@@ -294,8 +291,8 @@ func testWhenInitialDemandIsZero_AndThenFiveValuesAreRequested_ItEmitsFiveValues
     let expectedValues: [TimeInterval] = [1, 2, 3, 4, 5]
     var receivedValues: [TimeInterval] = []
     
-    let subscriber = TestSubscriber<TimeInterval>(demand: 0) { values in
-        receivedValues = values
+    let subscriber = TestSubscriber(demand: 0) { value in
+        receivedValues.append(value)
     }
     
     sut.subscribe(subscriber)
@@ -318,22 +315,15 @@ The only notable difference is that in this test you request five more values af
 There is still a gap in the implementation to cover: when a Publisher sends a value by calling `receive(_:)`, the Subscriber has a chance to return an updated demand. One important thing to note here is that the new demand will be added to the existing one. So if the Subscriber initially demands two values, there's no way to decrement that demand; you can return `none` to keep the demand as is, or specify the additional demand. 
 
 In order to test this setup, you'll need to hook into the `receive(_:)` method of the Subscriber. Add the following changes to the implementation of `TestSubscriber`:
+In order to test this setup, you'll need to change the `TestSubscriber` to allow modifying the demand:
 ```swift
 class TestSubscriber: Subscriber {
     ...
     private let onValueReceived: (Int) -> Int
     ...
-    init(demand: Int,
-         onValueReceived: @escaping (_ receivedValue: Int) -> Int,
-         onComplete: @escaping (_ receivedValues: [Int]) -> Void) {
-        self.demand = demand
-        self.onComplete = onComplete
-        self.onValueReceived = onValueReceived
-    }
-    ...
-}
 ```
-A new closure, `onValueReceived` will allow tests top update the demand. Update the implementation of `receive(_:)`:
+
+Now that `onValueReceived` has a return value, it will allow tests to update the demand. Update the implementation of `receive(_:)`:
 ```swift
 func receive(_ input: Int) -> Subscribers.Demand {
     receivedValues.append(input)
@@ -349,11 +339,10 @@ func testWhenInitialDemandIsOne_AndAnAdditionalValueIsRequested_ItEmitsTwoValues
     let expectedValues: [TimeInterval] = [1, 2]
     var receivedValues: [TimeInterval] = []
     
-    let subscriber = TestSubscriber<TimeInterval>(demand: 1, onValueReceived: { value in
+    let subscriber = TestSubscriber(demand: 1) { value in
+        receivedValues.append(value)
         return value == 1 ? 1 : 0
-    }, onComplete: { values in
-        receivedValues = values
-    })
+    }
     sut.subscribe(subscriber)
     
     let timeUpdates: [TimeInterval] = [1, 2, 3, 4, 5]

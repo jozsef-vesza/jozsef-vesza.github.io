@@ -155,16 +155,16 @@ func request(_ demand: Subscribers.Demand) {
     // 3.
     let interval = CMTime(seconds: self.interval, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
     timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) { [weak self] time in
-        guard let self = self, let subscriber = self.subscriber else { return }
         // 4.
-        self.requested -= .max(1)
+        guard 
+            let self = self, 
+            let subscriber = self.subscriber, 
+            self.requested > .none else { return }
         // 5.
+        self.requested -= .max(1)
+        // 6.
         let newDemand = subscriber.receive(time.seconds)
         self.requested += newDemand
-        // 6.
-        if self.requested == .none {
-            subscriber.receive(completion: .finished)
-        }
     }
 }
 ```
@@ -173,9 +173,11 @@ Okay, that's a lot of new code, let's go over the changes:
 1. When the Subscriber requests values, it can specify how many values it wants by passing the initial demand. The Subscription is responsible for keeping track of the demand, so you'll increment `requested` by the received amount.
 2. The goal is to only start emitting events once a Subscriber is attached to a Publisher. If `timeObserverToken` is nil, that means that the Subscription hasn't started producing values yet. Checking the demand is also important: it could be that you're dealing with a custom Subscriber instance which only requests values if a certain condition is true: your Subscription shouldn't complete right away, just defer the work until there's actual demand for values.
 3. At this point the Subscription starts to query the playback progress, with the frequency specified in `interval`.
-4. Once there is a new value to emit, `requested` is decremented to avoid sending more values than needed.
-5. The value is then delivered to the Subscriber (**Step 4** in the event sequence). Upon receiving a value, the Subscriber may choose to update the demand, so the Subscription must update `requested` to keep up with the new demand.
-6. If no more values are requested, the Subscription can complete (**The final step of the event sequence**).
+4. Once there is a new value to emit, the implementation checks if there are values demanded.
+5. Then `requested` is decremented to avoid sending more values than needed.
+6. The value is then delivered to the Subscriber (**Step 4** in the event sequence). Upon receiving a value, the Subscriber may choose to update the demand, so the Subscription must update `requested` to keep up with the new demand.
+
+> In some use cases it might make sense to send a completion event at some point (e.g. if the demand dropts to zero). This implementation however will only complete when the Subscription is cancelled, to work better with Combine's demand system.
 
 Notice how it's entirely up to the Subscribtion implementation to honor the demand. This is a crucial point: if you forget to decrement `requested`, the Subscriber may emit more values than requested; if you don't keep track of the updated demand, the Subscriber can end up delivering fewer values. There is no automatic behavior you can rely on to update the demand, and manual bookkeeping can be error-prone, which is why it's important to unit test your custom Publishers, which will be covered in Part 2 of the series.
 
