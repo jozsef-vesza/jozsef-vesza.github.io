@@ -162,12 +162,17 @@ a {
  * Blockquotes
  */
 blockquote {
-  color: $primary-color;
+  color: $text-color;
   border-left: 4px solid $primary-color-lighter;
   padding-left: $spacing-unit / 2;
+  // border-radius: .25rem;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  background-color: $code-snippet-background-color;
   @include relative-font-size(1.125);
   letter-spacing: -1px;
-  font-style: italic;
 
   > :last-child {
     margin-bottom: 0;
@@ -176,8 +181,9 @@ blockquote {
 
 @media (prefers-color-scheme: dark) {
   blockquote {
-    color: $primary-color-dark;
-    border-left: 4px solid $primary-color-dark-lighter;
+    color: $text-color-dark;
+    border-left: 4px solid $primary-color-dark;
+    background-color: $code-snippet-background-color-dark;
   }
 }
 
