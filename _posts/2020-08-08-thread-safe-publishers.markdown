@@ -23,7 +23,9 @@ Before going any further, enable [Thread Sanitizer](http://clang.llvm.org/docs/T
 
 <picture>
     <source srcset="/assets/2020-08-08-thread-safe-publishers/tsan-enable-dark.png" media="(prefers-color-scheme: dark)">
-    <img src="/assets/2020-08-08-thread-safe-publishers/tsan-enable.png">
+    <img 
+        src="/assets/2020-08-08-thread-safe-publishers/tsan-enable.png"
+        alt="Screenshot of enabling Thread Sanitizer for Tests via the Scheme Editor">
 </picture>
 
 ### Receiving Demand
@@ -101,7 +103,9 @@ Running this test with the Thread Sanitizer enabled will immediately flag the is
 
 <picture>
     <source srcset="/assets/2020-08-08-thread-safe-publishers/race1-dark.png" media="(prefers-color-scheme: dark)">
-    <img src="/assets/2020-08-08-thread-safe-publishers/race1.png">
+    <img 
+        src="/assets/2020-08-08-thread-safe-publishers/race1.png"
+        alt="Screenshot showing how there's a data race when the requested property is accessed from separate threads">
 </picture>
 
 A possible way to solve this issue is to introduce a serial queue to make sure that demand requests are handled in order:
@@ -171,7 +175,9 @@ As a logic test, this is not super useful, but it creates just enough chaos to s
 
 <picture>
     <source srcset="/assets/2020-08-08-thread-safe-publishers/race2-dark.png" media="(prefers-color-scheme: dark)">
-    <img src="/assets/2020-08-08-thread-safe-publishers/race2.png">
+    <img 
+        src="/assets/2020-08-08-thread-safe-publishers/race2.png"
+        alt="Screenshot showing how the requested property is accessed from both the private and the main queues">
 </picture>
 
 You'll notice that both Thread 1 and 11 are attempting to modify `requested`, confirming a race condition. At first it might seem like a good idea to use the same queue in the `sendValue(_:)` method:
