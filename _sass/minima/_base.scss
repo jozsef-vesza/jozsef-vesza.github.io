@@ -172,6 +172,7 @@ blockquote {
   padding-bottom: 16px;
   margin-top: 16px;
   margin-bottom: 16px;
+  padding-right: 8px;
   background-color: $code-snippet-background-color;
   @include relative-font-size(1.125);
   letter-spacing: -1px;
