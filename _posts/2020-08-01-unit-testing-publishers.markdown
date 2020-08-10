@@ -42,7 +42,7 @@ Looking at the marked lines, it's becoming clear that the responsibility of copi
 
 To cover all theses cases, you could divide the tests into the following categories:
 * Tests, that work with unlimited demand: The most common use case for Publishers is to subscribe using `sink(receiveCompletion:receiveValue:)`, and handle values as they are emitted. So you'll have to make sure that your Publisher works well with this setup.
-* Tests, that work with a fixed demand: it's fairly common that a Subscriber wants to limit the number of values emitted by a Publisher. Your tests need to verify that the Publisher emits the correct amount of values, and completes afterwards.
+* Tests, that work with a fixed demand: it's fairly common that a Subscriber wants to limit the number of values emitted by a Publisher. Your tests need to verify that the Publisher emits the correct amount of values.
 * Tests, that dynamically change the demand: a more advanced scenario is to update the demand during a Subscription's lifetime. This can be useful for heavier tasks, where the Publisher emits so many values that the Subscriber has a hard time keeping up. In this guide you'll create tests for the case where the demand is initially zero, but later increased.
 
 ## Setting Up the Tests
