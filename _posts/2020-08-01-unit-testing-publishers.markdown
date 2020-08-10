@@ -201,10 +201,11 @@ func receive(subscription: Subscription) {
 When the Publisher produces a value, it passes it to the Subscriber by calling `receive(_:)`. The Subscriber can then process the value, and optionally update the demand. Update the body of `receive(_:)` to the following:
 ```swift
 func receive(_ input: Int) -> Subscribers.Demand {
+    onValueReceived(input)
     return .none
 }
 ```
-In its current state, `TestSubscriber` will work with the demand passed in during initialization, and will not change it dynamically.
+In its current state, `TestSubscriber` will work with the demand passed in during initialization, and will not change it dynamically. When a value is received, it invokes `onValueReceived` with it.
 
 ### Receiving Completion
 
