@@ -3,6 +3,7 @@ layout: post
 title:  "Combine Publishers, Part 2: Unit Testing Custom Publishers"
 date:   2020-08-01
 categories: posts
+tags: [combine, swift]
 ---
 
 In [Part 1](https://jozsef-vesza.dev/2020/07/24/creating-a-custom-combine-publisher/) of the series, you've built a Publisher from scratch. One of the key parts of Combine's event delivery is keeping up with the Subscriber's demand. It involves some manual bookkeeping, which is known to be error-prone, so in this guide you'll learn how to ensure that your custom Publisher is not misbehaving. 
