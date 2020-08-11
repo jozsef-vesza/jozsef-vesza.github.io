@@ -29,3 +29,9 @@
 .dt-published {
     padding-left: 5px;
 }
+
+.sticky-header {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+}
