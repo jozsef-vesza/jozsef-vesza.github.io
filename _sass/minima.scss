@@ -1,23 +1,5 @@
 @charset "utf-8";
 
-// light mode
-$primary-color:    #3913B8;
-$text-color:       #111 !default;
-$background-color: #F2F6FF !default;
-$code-snippet-background-color: rgba(57, 19, 184, 0.1);
-$code-snippet-box-shadow: 0px 5px 20px rgba(92, 103, 153, 0.3), 0px 0px 3px rgba(0, 0, 0, 0.1);
-$primary-color-lighter: lighten($primary-color, 40%) !default;
-$primary-color-darker: darken($primary-color, 25%) !default;
-
-// dark mode
-$primary-color-dark:    #ff702f;
-$text-color-dark:       #FFF !default;
-$background-color-dark: #1F1F24;
-$code-snippet-background-color-dark: #292A2F;
-$code-snippet-box-shadow-dark: transparent;
-$primary-color-dark-lighter: lighten($primary-color-dark, 40%) !default;
-$primary-color-dark-darker: darken($primary-color-dark, 25%) !default;
-
 // Define defaults for each variable.
 
 $base-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !default;
@@ -55,6 +37,8 @@ $on-laptop:        800px !default;
 
 // Import partials.
 @import
+  "colors",
+  "elements",
   "minima/base",
   "minima/layout",
   "minima/syntax-highlighting"
