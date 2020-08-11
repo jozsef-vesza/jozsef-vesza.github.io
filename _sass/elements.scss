@@ -1,0 +1,31 @@
+@import "colors";
+
+.tag-list {
+    list-style-type: none;
+    margin-left: 0px;
+}
+  
+.tag-list-item {
+    float: left;
+    margin-right: 5px;
+    padding: 3px 6px;
+    border-radius: 8px;
+    background-color: $code-snippet-background-color;
+    color: $primary-color;
+    font-size: 0.85em;
+    a:hover {
+        color: unset;
+        text-decoration: none;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .tag-list-item {
+        background-color: $code-snippet-background-color-dark;
+        color: $primary-color-dark;
+    }
+}
+
+.dt-published {
+    padding-left: 5px;
+}

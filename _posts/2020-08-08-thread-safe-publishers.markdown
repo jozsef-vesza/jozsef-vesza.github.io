@@ -3,6 +3,7 @@ layout: post
 title:  "Combine Publishers, Part 3: Thead Safety"
 date:   2020-08-08
 categories: posts
+tags: [combine, swift]
 ---
 
 In [Parts 1](https://jozsef-vesza.dev/2020/07/24/creating-a-custom-combine-publisher/), and [2](https://jozsef-vesza.dev/2020/08/01/unit-testing-publishers/), you've built a custom Publisher, and did your best to cover its rough edges with unit tests. Now it's finally time to kick back and relax while it does its job, emitting playback progress. Or is it? Of course it will work well in most cases; but what happens if some threading issues are introduced? Let's find out!

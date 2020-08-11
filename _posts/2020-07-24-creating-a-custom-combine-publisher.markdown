@@ -3,6 +3,7 @@ layout: post
 title:  "Combine Publishers, Part 1: Creating a Custom Publisher"
 date:   2020-07-24
 categories: posts
+tags: [combine, swift]
 ---
 
 If you're just getting started with Combine, the idea of a custom publisher can sound scary, but diving into the topic has many benefits: you'll understand how parts of the framework work together, and will be able to create your own Combine-powered APIs. 

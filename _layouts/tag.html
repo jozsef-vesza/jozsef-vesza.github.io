@@ -1,0 +1,14 @@
+---
+name: tag
+layout: default
+---
+
+<div class="tags">
+  <h1>Tagged with "{{ page.tag-name }}"</h1>
+
+  {% for post in site.posts %}
+    {% if post.tags contains page.tag-name %}
+      <li><a class="post" href="{{ post.url }}">{{ post.title }}</a></li>
+    {% endif %}
+  {% endfor %}
+</div>
