@@ -13,6 +13,10 @@
     background-color: $code-snippet-background-color;
     color: $primary-color;
     font-size: 0.85em;
+    a:hover {
+        color: unset;
+        text-decoration: none;
+    }
 }
 
 @media (prefers-color-scheme: dark) {
