@@ -4,7 +4,7 @@ layout: default
 ---
 
 <div class="tags">
-  <h1>Articles tagged with "{{ page.tag-name }}"</h1>
+  <h1>Tagged with "{{ page.tag-name }}"</h1>
 
   {% for post in site.posts %}
     {% if post.tags contains page.tag-name %}
