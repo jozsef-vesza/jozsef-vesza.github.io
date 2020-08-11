@@ -28,7 +28,6 @@ twitter_username: j_vesza
 github_username:  jozsef-vesza
 show_excerpts: true
 permalink: /:year/:month/:day/:title/
-analytics_id: UA-174171336-1
 
 # Build settings
 theme: minima
